@@ -1,0 +1,26 @@
+{
+  "extends": "tslint:latest",
+  "rules": {
+    "quotemark": "single",
+    "trailing-comma": false,
+    "object-literal-sort-keys": false,
+    "no-console": false,
+    "curly": false,
+    "no-consecutive-blank-lines": false,
+    "whitespace": [false, "check-branch"],
+    "ordered-imports": false,
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
+    "no-string-literal": false,
+    "no-unused-new": false,
+    "prefer-const": false,
+    "space-before-function-paren": false,
+    "max-classes-per-file": [true, 10],
+    "callable-types": false,
+    "arrow-parens": [true, "ban-single-arg-parens"],
+    "ban-types": [true, [["String"]]],
+    "prefer-conditional-expression": false
+  },
+  "rulesDirectory": [
+    "node_modules/codelyzer"
+  ]
+}
