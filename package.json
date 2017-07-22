@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.16.0",
+    "hedgehog-client": "^0.3.2",
     "noflo": "^0.8.3"
   },
   "noflo": {
