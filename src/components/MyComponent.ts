@@ -10,10 +10,6 @@ if(!noflo.isBrowser()) {
     }
 }
 
-function log(data: any): void {
-    console.log(data);
-}
-
 export function getComponent() {
     let c = new noflo.Component();
     c.description = 'Sends the data items to console.log';
@@ -26,12 +22,21 @@ export function getComponent() {
         datatype: 'all'
     });
 
+    c.setUp = (callback) => {
+        console.log("setUp");
+        callback();
+    };
+    c.tearDown = (callback) => {
+        console.log("tearDown");
+        callback();
+    };
+
     return c.process((input, output) => {
         if(!input.hasData('in')) return;
 
         let data: any = input.getData('in');
         console.log(data);
-        return output.sendDone({
+        output.sendDone({
             out: data
         });
     });

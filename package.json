@@ -53,7 +53,7 @@
   },
   "noflo": {
     "components": {
-      "MyOutput": "components/MyOutput.ts"
+      "MyComponent": "components/MyComponent.ts"
     }
   }
 }
