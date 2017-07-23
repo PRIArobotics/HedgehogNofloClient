@@ -10,38 +10,46 @@ export function getComponent() {
     c.icon = 'area-chart';
     c.inPorts.add('in', {
         datatype: 'bang',
-        description: 'signal to trigger a sensor request'
+        description: 'signal to trigger a sensor request',
     });
     c.inPorts.add('port', {
         datatype: 'number',
-        description: 'the sensor port'
+        description: 'the sensor port',
+        control: true,
+        triggering: false,
     });
     c.inPorts.add('endpoint', {
         datatype: 'string',
-        description: 'the ZMQ endpoint to talk to'
+        description: 'the ZMQ endpoint to talk to',
+        control: true,
+        triggering: false,
     });
     c.outPorts.add('out', {
         datatype: 'number',
         description: 'the sensor value'
     });
 
-    return noflo.helpers.WirePattern(c, {
-        in: 'in',
-        params: ['port', 'endpoint'],
-        out: 'out',
-        async: true,
-    }, (data, groups, out, done) => {
-        let port: number = c.params.port;
-        let endpoint: string = c.params.endpoint;
+    return c.process((input, output) => {
+        if(!input.hasData('in')) return;
+        input.get('in');
 
-        if(endpoint) {
-            let hedgehog: HedgehogClient = connectionStore.getConnection(endpoint);
-            hedgehog.getAnalog(port).then((value: number) => {
-                out.send(value);
-                done();
-            });
-        } else {
-            done();
+        if(!(input.hasData('port') && input.hasData('endpoint'))) {
+            output.done();
+            return;
         }
+
+        let port: number = input.getData('port');
+        let endpoint: string = input.getData('endpoint');
+        if(!endpoint) {
+            output.done();
+            return;
+        }
+
+        let hedgehog: HedgehogClient = connectionStore.getConnection(endpoint);
+        hedgehog.getAnalog(port).then((value: number) => {
+            output.sendDone({
+                out: value
+            });
+        });
     });
 }

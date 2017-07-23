@@ -7,63 +7,63 @@ export function getComponent() {
     let c = new noflo.Component();
     c.description = 'Connects to a Hedgehog controller';
     c.icon = 'exchange';
-    c.inPorts.add('in', {
+    c.inPorts.add('connect', {
+        datatype: 'bang',
+        description: 'signal to connect to a controller',
+    });
+    c.inPorts.add('disconnect', {
+        datatype: 'bang',
+        description: 'signal to disconnect from a controller',
+    });
+    c.inPorts.add('endpoint', {
         datatype: 'string',
-        description: 'the ZMQ endpoint to connect to'
+        description: 'the ZMQ endpoint to connect to',
+        control: true,
+        triggering: false,
     });
     c.outPorts.add('out', {
         datatype: 'string',
         description: 'the ZMQ endpoint to which there is a connection'
     });
 
-    c.endpoints = {};
+    c.endpoint = null;
 
-    function cleanUp(scope) {
-        let endpoint = c.endpoints[scope];
-        if(endpoint) {
-            connectionStore.disconnect(endpoint);
-            console.log("cleanUp", endpoint);
-            c.endpoints[scope] = null;
+    function cleanUp() {
+        if(c.endpoint) {
+            console.log("disconnect", c.endpoint);
+            connectionStore.disconnect(c.endpoint);
+            c.endpoint = null;
         }
     }
 
     c.tearDown = (callback) => {
-        console.log("tearDown");
-        for(let scope in c.endpoints)
-            cleanUp(scope);
-        c.contexts = {};
+        cleanUp();
         callback();
     };
 
     return c.process((input, output) => {
-        if(!input.hasData('in')) return;
+        if(input.hasData('connect')) {
+            input.get('connect');
 
-        let ip = input.get('in');
+            let endpoint: string = input.getData('endpoint');
+            if(!endpoint)
+                endpoint = 'tcp://localhost:10789';
 
-        // normalize endpoint by filling in the default when '' is given
-        let endpoint: string = ip.data;
-        if(endpoint === '')
-            endpoint = 'tcp://localhost:10789';
-
-        let oldEndpoint = c.endpoints[ip.scope];
-
-        console.log("process", endpoint);
-
-        if(endpoint === null) {
-            cleanUp(ip.scope);
-            output.sendDone({
-                out: null
-            });
-        } else if(oldEndpoint && oldEndpoint === endpoint) {
-            output.done();
-        } else {
-            cleanUp(ip.scope);
-
-            console.log("connect", endpoint);
-            connectionStore.connect(endpoint);
-            c.endpoints[ip.scope] = endpoint;
+            if(!c.endpoint || c.endpoint !== endpoint) {
+                cleanUp();
+                console.log("connect", endpoint);
+                connectionStore.connect(endpoint);
+                c.endpoint = endpoint;
+            }
             output.sendDone({
                 out: endpoint
+            });
+        } else if(input.hasData('disconnect')) {
+            input.get('disconnect');
+
+            cleanUp();
+            output.sendDone({
+                out: ''
             });
         }
     });

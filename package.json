@@ -54,7 +54,8 @@
   },
   "noflo": {
     "components": {
-      "MyComponent": "components/MyComponent.ts"
+      "Connect": "components/Connect.js",
+      "ReadAnalog": "components/ReadAnalog.js"
     }
   }
 }
