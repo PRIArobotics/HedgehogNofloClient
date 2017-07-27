@@ -45,6 +45,7 @@ jspm_packages
 # Typings
 typings
 
-# Build directory
+# Build directories
 /build/
 /components/
+/lib/

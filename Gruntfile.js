@@ -31,8 +31,8 @@ module.exports = function (grunt) {
         allowJs: true
       },
       all: {
-        src: ['src/components/**/*.ts', 'typings/index.d.ts'],
-        outDir: 'components'
+        src: ['src/**/*.ts', 'typings/index.d.ts'],
+        outDir: '.'
       },
       test: {
         src: ['test/**/*.ts', 'typings/index.d.ts'],

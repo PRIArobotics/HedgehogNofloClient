@@ -1,6 +1,6 @@
 import "babel-polyfill";
 import {HedgehogClient} from 'hedgehog-client';
-import {connectionStore} from './ConnectionStore';
+import {connectionStore} from '../lib/ConnectionStore';
 
 let noflo: any = require('noflo');
 

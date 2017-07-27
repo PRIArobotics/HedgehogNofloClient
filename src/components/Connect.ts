@@ -1,5 +1,5 @@
 import "babel-polyfill";
-import {connectionStore} from './ConnectionStore';
+import {connectionStore} from '../lib/ConnectionStore';
 
 let noflo: any = require('noflo');
 
