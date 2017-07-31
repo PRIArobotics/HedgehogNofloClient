@@ -1,6 +1,5 @@
 import "babel-polyfill";
 import {HedgehogClient} from 'hedgehog-client';
-import {connectionStore} from '../lib/ConnectionStore';
 import * as nUtils from '../lib/NofloUtils';
 
 let noflo: any = require('noflo');
@@ -27,6 +26,6 @@ export function getComponent() {
         if(!nUtils.available(input, 'port')) return;
         let port: number = input.getData('port');
 
-        nUtils.bangFromHedgehogClient(input, output, 'out', (hedgehog) => hedgehog.setDigitalOutput(port, on));
+        nUtils.bangFromHedgehogClient(input, output, 'out', (hedgehog: HedgehogClient) => hedgehog.setDigitalOutput(port, on));
     });
 }
