@@ -21,15 +21,11 @@ export function getComponent() {
     });
 
     return c.process((input, output) => {
-        if(!input.hasData('in')) return;
-        input.get('in');
+        if(!nUtils.consume(input, 'in')) return;
 
-        if(!input.hasData('port')) {
-            output.done();
-            return;
-        }
-
+        if(!nUtils.available(input, 'port')) return;
         let port: number = input.getData('port');
+
         nUtils.returnFromHedgehogClient(input, output, (hedgehog) => hedgehog.getAnalog(port));
     });
 }
