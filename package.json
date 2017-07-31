@@ -60,7 +60,8 @@
       "ReadDigital": "components/ReadDigital.js",
       "WriteDigitalOutput": "components/WriteDigitalOutput.js",
       "ReadIoConfig": "components/ReadIoConfig.js",
-      "Motor": "components/Motor.js"
+      "Motor": "components/Motor.js",
+      "Servo": "components/Servo.js"
     }
   }
 }
