@@ -56,7 +56,8 @@
     "components": {
       "Connect": "components/Connect.js",
       "ReadAnalog": "components/ReadAnalog.js",
-      "ReadDigital": "components/ReadDigital.js"
+      "ReadDigital": "components/ReadDigital.js",
+      "ReadIoConfig": "components/ReadIoConfig.js"
     }
   }
 }
