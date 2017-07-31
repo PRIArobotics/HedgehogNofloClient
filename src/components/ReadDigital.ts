@@ -1,6 +1,7 @@
 import "babel-polyfill";
 import {HedgehogClient} from 'hedgehog-client';
 import {connectionStore} from '../lib/ConnectionStore';
+import * as nUtils from '../lib/NofloUtils';
 
 let noflo: any = require('noflo');
 
@@ -12,21 +13,11 @@ export function getComponent() {
         datatype: 'bang',
         description: 'signal to trigger a sensor request',
     });
-    c.inPorts.add('port', {
-        datatype: 'number',
-        description: 'the sensor port',
-        control: true,
-        triggering: false,
-    });
-    c.inPorts.add('endpoint', {
-        datatype: 'string',
-        description: 'the ZMQ endpoint to talk to',
-        control: true,
-        triggering: false,
-    });
+    nUtils.addPortInPort(c, 'the sensor port');
+    nUtils.addEndpointInPort(c);
     c.outPorts.add('out', {
         datatype: 'boolean',
-        description: 'the sensor value'
+        description: 'the sensor value',
     });
 
     return c.process((input, output) => {
