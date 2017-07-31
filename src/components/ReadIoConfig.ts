@@ -24,23 +24,12 @@ export function getComponent() {
         if(!input.hasData('in')) return;
         input.get('in');
 
-        if(!(input.hasData('port') && input.hasData('endpoint'))) {
+        if(!input.hasData('port')) {
             output.done();
             return;
         }
 
         let port: number = input.getData('port');
-        let endpoint: string = input.getData('endpoint');
-        if(!endpoint) {
-            output.done();
-            return;
-        }
-
-        let hedgehog: HedgehogClient = connectionStore.getConnection(endpoint);
-        hedgehog.getIOConfig(port).then((value: number) => {
-            output.sendDone({
-                out: value
-            });
-        });
+        nUtils.returnFromHedgehogClient(input, output, (hedgehog) => hedgehog.getIOConfig(port));
     });
 }
