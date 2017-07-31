@@ -54,3 +54,10 @@ export function returnFromHedgehogClient<T>(input, output, outPort: string, call
         });
     });
 }
+
+export function bangFromHedgehogClient(input, output, outPort: string, call: (hedgehog: HedgehogClient) => Promise<any>) {
+    returnFromHedgehogClient(input, output, outPort, async (hedgehog) => {
+        await call(hedgehog);
+        return true;
+    });
+}
