@@ -59,7 +59,8 @@
       "ReadAnalog": "components/ReadAnalog.js",
       "ReadDigital": "components/ReadDigital.js",
       "WriteDigitalOutput": "components/WriteDigitalOutput.js",
-      "ReadIoConfig": "components/ReadIoConfig.js"
+      "ReadIoConfig": "components/ReadIoConfig.js",
+      "Motor": "components/Motor.js"
     }
   }
 }
