@@ -26,6 +26,6 @@ export function getComponent() {
         if(!nUtils.available(input, 'port')) return;
         let port: number = input.getData('port');
 
-        nUtils.returnFromHedgehogClient(input, output, (hedgehog) => hedgehog.getAnalog(port));
+        nUtils.returnFromHedgehogClient(input, output, 'out', (hedgehog) => hedgehog.getAnalog(port));
     });
 }

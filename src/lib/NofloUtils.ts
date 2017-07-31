@@ -35,7 +35,7 @@ export function consume(input, inPort: string): boolean {
     return true;
 }
 
-export function returnFromHedgehogClient<T>(input, output, call: (hedgehog: HedgehogClient) => Promise<T>) {
+export function returnFromHedgehogClient<T>(input, output, outPort: string, call: (hedgehog: HedgehogClient) => Promise<T>) {
     if(!input.hasData('endpoint')) {
         output.done();
         return;
