@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "NoFlo Flow-based-programming client library for the Hedgehog Educational Robotics Controller",
   "scripts": {
+    "compile": "grunt compile",
     "test": "mocha --reporter spec --check-leaks --recursive build/test/"
   },
   "repository": {
@@ -12,7 +13,7 @@
   "keywords": [
     "hedgehog",
     "controller",
-    "hedgehog",
+    "noflo",
     "pria",
     "robotics",
     "robot",
