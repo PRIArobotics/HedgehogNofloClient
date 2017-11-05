@@ -1,68 +1,57 @@
 {
   "name": "hedgehog-noflo-client",
-  "version": "0.0.0",
   "description": "NoFlo Flow-based-programming client library for the Hedgehog Educational Robotics Controller",
-  "scripts": {
-    "compile": "grunt compile",
-    "test": "mocha --reporter spec --check-leaks --recursive build/test/"
+  "version": "0.0.0",
+  "author": {
+    "name": "Clemens Koza",
+    "email": "koza@pria.at"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PRIArobotics/HedgehogNofloClient.git"
+    "url": "git://github.com/PRIArobotics/HedgehogNofloClient.git"
+  },
+  "scripts": {
+    "compile": "grunt compile",
+    "build": "grunt build",
+    "test": "grunt test",
+
+    "start": "noflo-nodejs --register false --secret secret --debug --host localhost --ide http://localhost:9999/index.html"
   },
   "keywords": [
     "hedgehog",
     "controller",
     "noflo",
+    "ecosystem:noflo",
     "pria",
     "robotics",
     "robot",
     "education"
   ],
-  "author": "Clemens Koza",
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/PRIArobotics/HedgehogNofloClient/issues"
   },
   "homepage": "https://github.com/PRIArobotics/HedgehogNofloClient#readme",
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "hedgehog-client": "^0.3.2",
+    "noflo": "^0.8.6"
+  },
   "devDependencies": {
     "babel-preset-es2015": "^6.18.0",
-    "codelyzer": "^3.0.1",
-    "fbp-loader": "^0.1.1",
-    "fbp-spec": "^0.2.0",
+    "codelyzer": "^3.2.2",
+    "fbp-loader": "^0.1.2",
     "grunt": "^1.0.1",
-    "grunt-babel": "^6.0.0",
+    "grunt-babel": "^7.0.0",
     "grunt-concurrent": "^2.3.1",
     "grunt-contrib-clean": "^1.0.0",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-symlink": "^1.0.0",
-    "grunt-contrib-uglify": "^3.0.1",
-    "grunt-noflo-browser": "^1.0.3",
-    "grunt-run": "^0.7.0",
-    "grunt-ts": "^6.0.0-beta.3",
+    "grunt-ts": "^6.0.0-beta.17",
     "grunt-tslint": "^5.0.1",
-    "mocha": "^3.1.2",
-    "noflo-core": "^0.4.0",
+    "mocha": "^4.0.0",
+    "noflo-core": "^0.4.1",
     "noflo-nodejs": "^0.8.1",
-    "tslint": "^5.2.0",
-    "typescript": "~2.4.1",
+    "tslint": "^5.8.0",
+    "typescript": "~2.6.1",
     "typings": "^2.1.0"
-  },
-  "dependencies": {
-    "babel-polyfill": "^6.16.0",
-    "hedgehog-client": "^0.3.2",
-    "noflo": "^0.8.3"
-  },
-  "noflo": {
-    "components": {
-      "Connect": "components/Connect.js",
-      "WriteInputState": "components/WriteInputState.js",
-      "ReadAnalog": "components/ReadAnalog.js",
-      "ReadDigital": "components/ReadDigital.js",
-      "WriteDigitalOutput": "components/WriteDigitalOutput.js",
-      "ReadIoConfig": "components/ReadIoConfig.js",
-      "Motor": "components/Motor.js",
-      "Servo": "components/Servo.js"
-    }
   }
 }

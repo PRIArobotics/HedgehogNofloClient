@@ -27,7 +27,7 @@ coverage
 build/Release
 
 # Dependency directories
-node_modules
+/node_modules/
 jspm_packages
 
 # Optional npm cache directory
@@ -49,3 +49,9 @@ typings
 /build/
 /components/
 /lib/
+/browser/
+/spec/*.js
+/spec/*.xml
+/spec/runner.html
+flowhub.json
+fbp.json

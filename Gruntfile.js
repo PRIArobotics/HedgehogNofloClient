@@ -1,23 +1,6 @@
 module.exports = function (grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    noflo_browser: {
-      build: {
-        files: {
-          'build/browser/noflo-hedgehog.js': ['package.json']
-        }
-      }
-    },
-    uglify: {
-      options: {
-        report: 'min'
-      },
-      noflo: {
-        files: {
-          './build/browser/noflo-core.min.js': ['./build/browser/noflo-core.js']
-        }
-      }
-    },
     ts: {
       options: {
         target: 'es6',
@@ -50,18 +33,14 @@ module.exports = function (grunt) {
     clean: [
       'build',
       'components',
+      'lib',
       'tmp'
     ],
-    copy: {
-      all: {
-        files: []
-      }
-    },
     tslint: {
       options: {
         configuration: "tslint.json"
       },
-      all: 'src/components/**/*.ts',
+      all: 'src/**/*.ts',
       test: 'test/**/*.ts'
     }
   });
@@ -69,12 +48,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-ts');
   grunt.loadNpmTasks("grunt-tslint");
   grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-contrib-symlink');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-noflo-browser');
   grunt.loadNpmTasks('grunt-babel');
 
-  grunt.registerTask('compile', ['ts', 'noflo_browser', 'uglify', 'babel']);
-  grunt.registerTask('build', ['clean', 'compile', 'copy']);
+  grunt.registerTask('compile', ['ts', 'babel']);
+  grunt.registerTask('build', ['clean', 'compile']);
 };
