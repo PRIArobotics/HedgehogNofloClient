@@ -15,7 +15,8 @@
     "build": "grunt build",
     "test": "grunt test",
 
-    "start": "noflo-nodejs --register false --secret secret --debug --host localhost --ide http://localhost:9999/index.html"
+    "start": "noflo-nodejs --register false --secret secret --debug --host localhost --ide http://localhost:9999/index.html",
+    "run-graph": "noflo-nodejs --register false --secret secret --debug --graph graphs/Hello.fbp --batch"
   },
   "keywords": [
     "hedgehog",
