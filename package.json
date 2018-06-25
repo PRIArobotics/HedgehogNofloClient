@@ -16,7 +16,7 @@
     "test": "grunt test",
     "gsl-noflo": "python -m gsl_noflo",
     "start": "noflo-nodejs --register false --secret secret --debug --host localhost --ide http://localhost:9999/index.html",
-    "run-graph": "noflo-nodejs --register false --secret secret --debug --graph graphs/Hello.fbp --batch"
+    "run-graph": "noflo-nodejs --debug --verbose --batch --graph graphs/Connection.fbp"
   },
   "keywords": [
     "hedgehog",
@@ -35,7 +35,7 @@
   "homepage": "https://github.com/PRIArobotics/HedgehogNofloClient#readme",
   "dependencies": {
     "babel-polyfill": "^6.26",
-    "hedgehog-client": "^0.3.2",
+    "hedgehog-client": "file:../HedgehogNodeClient",
     "noflo": "^1.1"
   },
   "devDependencies": {

@@ -1,71 +1,32 @@
-import "babel-polyfill";
+const noflo = require('noflo');
 import {connectionStore} from '../lib/ConnectionStore';
 
-let noflo: any = require('noflo');
-
 export function getComponent() {
-    let c = new noflo.Component();
+    const c = new noflo.Component();
     c.description = 'Connects to a Hedgehog controller';
     c.icon = 'exchange';
-    c.inPorts.add('connect', {
-        datatype: 'bang',
-        description: 'signal to connect to a controller',
-    });
-    c.inPorts.add('disconnect', {
-        datatype: 'bang',
-        description: 'signal to disconnect from a controller',
-    });
+
     c.inPorts.add('endpoint', {
         datatype: 'string',
-        description: 'the ZMQ endpoint to connect to',
-        control: true,
-        triggering: false,
+        default: 'tcp://localhost:10789',
     });
-    c.outPorts.add('out', {
+
+    c.outPorts.add('conn', {
         datatype: 'string',
-        description: 'the ZMQ endpoint to which there is a connection'
     });
-
-    c.endpoint = null;
-
-    function cleanUp() {
-        if(c.endpoint) {
-            console.log("disconnect", c.endpoint);
-            connectionStore.disconnect(c.endpoint);
-            c.endpoint = null;
-        }
-    }
-
-    c.tearDown = (callback) => {
-        cleanUp();
-        callback();
-    };
 
     return c.process((input, output) => {
-        if(input.hasData('connect')) {
-            input.get('connect');
+        if (!input.hasData('endpoint')) return;
 
-            let endpoint: string = input.getData('endpoint');
-            if(!endpoint)
-                endpoint = 'tcp://localhost:10789';
-
-            if(!c.endpoint || c.endpoint !== endpoint) {
-                cleanUp();
-                console.log("connect", endpoint);
-                connectionStore.connect(endpoint);
-                c.endpoint = endpoint;
-            }
-            output.sendDone({
-                out: endpoint
-            });
-        } else if(input.hasData('disconnect')) {
-            input.get('disconnect');
-
-            cleanUp();
-            output.sendDone({
-                out: ''
-            });
+        let endpoint: string = input.getData('endpoint');
+        if(connectionStore.getConnection(endpoint)) {
+            //TODO error
         }
+
+        connectionStore.connect(endpoint);
+
+        output.sendDone({
+            conn: endpoint,
+        });
     });
 }
-

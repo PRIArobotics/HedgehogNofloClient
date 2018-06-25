@@ -1,0 +1,18 @@
+modules:
+- id: Servo
+  description: sets a servo's position
+  icon: tachometer
+  inPorts:
+  - template: endpoint
+  - template: port
+    description: the servo port
+  - id: active
+    description: whether to enable the servo
+    datatype: boolean
+    control: true
+  - id: position
+    description: whether to enable the servo
+    datatype: boolean
+    control: true
+  outPorts:
+  - template: bang

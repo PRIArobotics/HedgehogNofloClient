@@ -1,32 +1,49 @@
-import "babel-polyfill";
+const noflo = require('noflo');
 import {HedgehogClient} from 'hedgehog-client';
 import {connectionStore} from '../lib/ConnectionStore';
-import * as nUtils from '../lib/NofloUtils';
-
-let noflo: any = require('noflo');
 
 export function getComponent() {
-    let c = new noflo.Component();
+    const c = new noflo.Component();
     c.description = 'sets a motor\'s velocity';
     c.icon = 'tachometer';
+
+    c.inPorts.add('conn', {
+        datatype: 'string',
+        control: true,
+        default: 'tcp://localhost:10789',
+    });
+
+    c.inPorts.add('port', {
+        datatype: 'number',
+        description: 'the motor port',
+        control: true,
+    });
     c.inPorts.add('power', {
         datatype: 'number',
         description: 'motor power between +/-1000',
     });
-    nUtils.addPortInPort(c, 'the motor port');
-    nUtils.addEndpointInPort(c);
-    c.outPorts.add('out', {
-        datatype: 'bang',
-        description: 'signals successful execution',
+
+    c.outPorts.add('conn', {
+        datatype: 'string',
+        description: 'returns the connection after successful execution',
     });
 
     return c.process((input, output) => {
-        if(!nUtils.available(input, 'power')) return;
+        if (!input.hasData('conn', 'port', 'power')) return;
+
+        let endpoint: string = input.getData('conn');
+        let port: number = input.getData('port');
         let power: number = input.getData('power');
 
-        if(!nUtils.available(input, 'port')) return;
-        let port: number = input.getData('port');
+        let conn = connectionStore.getConnection(endpoint);
+        if(!conn) {
+            //TODO error
+        }
 
-        nUtils.bangFromHedgehogClient(input, output, 'out', (hedgehog: HedgehogClient) => hedgehog.move(port, power));
+        conn.move(port, power).then(() => {
+            output.sendDone({
+                conn: endpoint,
+            });
+        });
     });
 }

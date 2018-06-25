@@ -22,14 +22,14 @@ module.exports = function (grunt) {
         outDir: 'build'
       }
     },
-    babel: {
-      options: {
-        presets: ['es2015']
-      },
-      all: {
-        files: []
-      }
-    },
+    // babel: {
+    //   options: {
+    //     presets: ['es2015']
+    //   },
+    //   all: {
+    //     files: []
+    //   }
+    // },
     clean: [
       'build',
       'components',
@@ -48,8 +48,9 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-ts');
   grunt.loadNpmTasks("grunt-tslint");
   grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-babel');
+  // grunt.loadNpmTasks('grunt-babel');
 
-  grunt.registerTask('compile', ['ts', 'babel']);
+  // grunt.registerTask('compile', ['ts', 'babel']);
+  grunt.registerTask('compile', ['ts']);
   grunt.registerTask('build', ['clean', 'compile']);
 };
