@@ -9,10 +9,10 @@
     "removeComments": false,
     "noImplicitAny": false,
     "allowJs": true,
-    "outDir": "build"
+    "outDir": "."
   },
   "include": [
-    "**/*.ts"
+    "src/**/*.ts"
   ],
   "files": [
     "typings/index.d.ts"

@@ -42,6 +42,9 @@ jspm_packages
 # JetBrains
 .idea
 
+# VS Code
+.vscode
+
 # Typings
 typings
 
