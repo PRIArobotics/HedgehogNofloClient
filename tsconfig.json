@@ -8,14 +8,12 @@
     "experimentalDecorators": true,
     "removeComments": false,
     "noImplicitAny": false,
-    "allowJs": true,
-    "outDir": "."
+    "outDir": ".",
+    "lib": ["es2015", "es6", "es5", "dom", "scripthost"],
+    "allowJs": true
   },
   "include": [
     "src/**/*.ts"
-  ],
-  "files": [
-    "typings/index.d.ts"
   ],
   "exclude": [
     "node_modules"

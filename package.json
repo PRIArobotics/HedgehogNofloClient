@@ -11,9 +11,9 @@
     "url": "git://github.com/PRIArobotics/HedgehogNofloClient.git"
   },
   "scripts": {
-    "compile": "grunt compile",
     "build": "grunt build",
-    "test": "grunt test",
+    "test": "nyc mocha --require ts-node/register --reporter spec --check-leaks test/**/*.spec.ts",
+    "coveralls": "nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls",
     "gsl-noflo": "python -m gsl_noflo",
     "start": "noflo-nodejs --register false --secret secret --debug --host localhost --ide http://localhost:9999/index.html",
     "run-graph": "noflo-nodejs --debug --verbose --batch --graph graphs/Connection.fbp"
@@ -34,25 +34,43 @@
   },
   "homepage": "https://github.com/PRIArobotics/HedgehogNofloClient#readme",
   "dependencies": {
-    "babel-polyfill": "^6.26",
-    "hedgehog-client": "file:../HedgehogNodeClient",
-    "noflo": "^1.1"
+    "@babel/core": "^7.1.5",
+    "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.1.5",
+    "hedgehog-client": "^0.4.2",
+    "noflo": "^1.1.3"
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.18",
-    "codelyzer": "^4.3",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.3",
+    "coveralls": "^3.0.2",
     "fbp-loader": "^0.1.2",
     "grunt": "^1.0",
-    "grunt-babel": "^7.0",
+    "grunt-babel": "^8.0.0",
     "grunt-concurrent": "^2.3",
-    "grunt-contrib-clean": "^1.0",
+    "grunt-contrib-clean": "^2.0.0",
     "grunt-ts": "^6.0.0-beta.19",
     "grunt-tslint": "^5.0",
     "mocha": "^5.2",
+    "mocha-lcov-reporter": "^1.3.0",
     "noflo-core": "^0.5.0",
     "noflo-math": "^0.3.0",
     "noflo-nodejs": "^0.10.1",
+    "nyc": "^13.1.0",
+    "ts-node": "^7.0.1",
     "tslint": "^5.10",
-    "typescript": "^2.9"
+    "typescript": "^3.1.6"
+  },
+  "nyc": {
+    "reporter": "html",
+    "all": true,
+    "extension": [
+      ".ts"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "sourceMap": true,
+    "instrument": true
   }
 }
