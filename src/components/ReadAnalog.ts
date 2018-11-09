@@ -1,6 +1,9 @@
-const noflo = require('noflo');
+import * as noflo from 'noflo';
+
+// <GSL customizable: module-extras>
 import { HedgehogClient } from 'hedgehog-client';
 import { DEFAULT_ENDPOINT, connectionStore } from '../lib/ConnectionStore';
+// </GSL customizable: module-extras>
 
 export function getComponent() {
     let c = new noflo.Component();
@@ -14,8 +17,8 @@ export function getComponent() {
     });
     c.inPorts.add('port', {
         datatype: 'number',
-        description: 'the motor port',
         control: true,
+        description: 'the analog port',
     });
     c.inPorts.add('in', {
         datatype: 'bang',
@@ -24,7 +27,6 @@ export function getComponent() {
 
     c.outPorts.add('endpoint', {
         datatype: 'string',
-        description: 'returns the connection after successful execution',
     });
     c.outPorts.add('out', {
         datatype: 'number',
@@ -39,11 +41,12 @@ export function getComponent() {
             endpoint,
         });
 
-        if (!input.hasData('port', 'in')) {
+        if (!(input.hasData('port', 'in'))) {
             output.done();
             return;
         }
 
+        // <GSL customizable: component>
         let port: number = input.getData('port');
         input.get('in');
 
@@ -57,5 +60,6 @@ export function getComponent() {
                 out: value,
             });
         });
+        // </GSL customizable: component>
     });
 }

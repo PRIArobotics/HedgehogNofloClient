@@ -1,4 +1,20 @@
 components:
+- name: ReadAnalog
+  description: reads an analog sensor
+  icon: area-chart
+  inPorts:
+  - template: endpoint
+  - template: port
+    description: the analog port
+  - template: in-bang
+    description: signal to trigger a sensor request
+  outPorts:
+  - template: endpoint
+  - name: out
+    datatype: number
+    description: the sensor value
+  preconditions: port, in
+
 - name: ReadDigital
   description: reads a digital sensor
   icon: area-chart
