@@ -50,3 +50,23 @@ components:
     datatype: boolean
     description: the sensor value
   preconditions: port, in
+
+- name: ReadDigitalStream
+  description: reads a digital sensor
+  icon: area-chart
+  inPorts:
+  - template: endpoint
+  - template: port
+    description: the digital port
+  - name: start
+    datatype: bang
+    description: Start the stream of sensor values
+  - name: stop
+    datatype: bang
+    description: Stop the stream of sensor values
+  outPorts:
+  - template: endpoint
+  - name: out
+    datatype: boolean
+    description: the sensor values
+  preconditions: port && (start || stop)

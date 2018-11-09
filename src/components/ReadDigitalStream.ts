@@ -1,22 +1,24 @@
-const noflo = require('noflo');
-import {HedgehogClient} from 'hedgehog-client';
-import {connectionStore} from '../lib/ConnectionStore';
+import * as noflo from 'noflo';
+
+// <GSL customizable: module-extras>
+import { HedgehogClient } from 'hedgehog-client';
+import { DEFAULT_ENDPOINT, connectionStore } from '../lib/ConnectionStore';
+// </GSL customizable: module-extras>
 
 export function getComponent() {
     let c = new noflo.Component();
     c.description = 'reads a digital sensor';
     c.icon = 'area-chart';
 
-    c.inPorts.add('conn', {
+    c.inPorts.add('endpoint', {
         datatype: 'string',
         control: true,
-        default: 'tcp://localhost:10789',
+        default: DEFAULT_ENDPOINT,
     });
-
     c.inPorts.add('port', {
         datatype: 'number',
-        description: 'the motor port',
         control: true,
+        description: 'the digital port',
     });
     c.inPorts.add('start', {
         datatype: 'bang',
@@ -27,15 +29,15 @@ export function getComponent() {
         description: 'Stop the stream of sensor values',
     });
 
-    c.outPorts.add('conn', {
+    c.outPorts.add('endpoint', {
         datatype: 'string',
-        description: 'returns the connection after the stream was stopped',
     });
     c.outPorts.add('out', {
         datatype: 'boolean',
         description: 'the sensor values',
     });
 
+    // <GSL customizable: component-extras>
     c.contexts = {};
 
     const cleanUp = (scope) => {
@@ -50,13 +52,22 @@ export function getComponent() {
         Object.keys(c.contexts).forEach(cleanUp);
         callback();
     };
+    // </GSL customizable: component-extras>
 
     return c.process((input, output, context) => {
-        if (!input.hasData('conn', 'port')) return;
+        if (!input.hasData('endpoint')) return;
 
-        if (!input.hasData('start') && !input.hasData('stop')) return;
+        let endpoint: string = input.getData('endpoint');
+        output.send({
+            endpoint,
+        });
 
-        let endpoint: string = input.getData('conn');
+        if (!(input.hasData('port') && (input.hasData('start') || input.hasData('stop')))) {
+            output.done();
+            return;
+        }
+
+        // <GSL customizable: component>
         let port: number = input.getData('port');
 
         let conn = connectionStore.getConnection(endpoint);
@@ -81,9 +92,8 @@ export function getComponent() {
             const scope = input.get('stop').scope;
 
             cleanUp(scope);
-            output.sendDone({
-                conn: endpoint,
-            });
+            output.done();
         }
+        // </GSL customizable: component>
     });
 }
