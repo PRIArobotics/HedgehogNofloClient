@@ -1,18 +1,16 @@
-modules:
-- id: Servo
-  description: sets a servo's position
-  icon: tachometer
+components:
+- name: ReadDigital
+  description: reads a digital sensor
+  icon: area-chart
   inPorts:
   - template: endpoint
   - template: port
-    description: the servo port
-  - id: active
-    description: whether to enable the servo
-    datatype: boolean
-    control: true
-  - id: position
-    description: whether to enable the servo
-    datatype: boolean
-    control: true
+    description: the digital port
+  - template: in-bang
+    description: signal to trigger a sensor request
   outPorts:
-  - template: bang
+  - template: endpoint
+  - name: out
+    datatype: boolean
+    description: the sensor value
+  preconditions: port, in

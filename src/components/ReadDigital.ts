@@ -1,31 +1,32 @@
-const noflo = require('noflo');
-import {HedgehogClient} from 'hedgehog-client';
-import {connectionStore} from '../lib/ConnectionStore';
+import * as noflo from 'noflo';
+
+// <GSL customizable: module-extras>
+import { HedgehogClient } from 'hedgehog-client';
+import { DEFAULT_ENDPOINT, connectionStore } from '../lib/ConnectionStore';
+// </GSL customizable: module-extras>
 
 export function getComponent() {
     let c = new noflo.Component();
     c.description = 'reads a digital sensor';
     c.icon = 'area-chart';
 
-    c.inPorts.add('conn', {
+    c.inPorts.add('endpoint', {
         datatype: 'string',
         control: true,
-        default: 'tcp://localhost:10789',
+        default: DEFAULT_ENDPOINT,
     });
-
     c.inPorts.add('port', {
         datatype: 'number',
-        description: 'the motor port',
         control: true,
+        description: 'the digital port',
     });
     c.inPorts.add('in', {
         datatype: 'bang',
         description: 'signal to trigger a sensor request',
     });
 
-    c.outPorts.add('conn', {
+    c.outPorts.add('endpoint', {
         datatype: 'string',
-        description: 'returns the connection after successful execution',
     });
     c.outPorts.add('out', {
         datatype: 'boolean',
@@ -33,9 +34,19 @@ export function getComponent() {
     });
 
     return c.process((input, output) => {
-        if (!input.hasData('conn', 'port', 'in')) return;
+        if (!input.hasData('endpoint')) return;
 
-        let endpoint: string = input.getData('conn');
+        let endpoint: string = input.getData('endpoint');
+        output.send({
+            endpoint,
+        });
+
+        if (!(input.hasData('port', 'in'))) {
+            output.done();
+            return;
+        }
+
+        // <GSL customizable: component>
         let port: number = input.getData('port');
         input.get('in');
 
@@ -44,11 +55,11 @@ export function getComponent() {
             //TODO error
         }
 
-        conn.getDigital(port).then((value: boolean) => {
+        conn.getAnalog(port).then((value: boolean) => {
             output.sendDone({
-                conn: endpoint,
                 out: value,
             });
         });
+        // </GSL customizable: component>
     });
 }

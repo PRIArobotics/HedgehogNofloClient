@@ -1,235 +1,168 @@
 import os.path
+import re
 
 from gsl import lines, generate
 from gsl.strings import case
 
-from gsl_protocol.grammar.HedgehogProtocolVisitor import Field, Oneof, MandatoryParam, RepeatedParam, OptionalParam
 from . import unique
 
 
 def generate_code(model, root='.'):
-    for mod in model.modules:
-        generate_module_code(model, mod, root)
+    for component in model.components:
+        generate_component_code(model, component, root)
 
 
-def generate_module_code(model, mod, root):
-    out_file = os.path.join(root, 'hedgehog/protocol/messages', *mod.path, f'{mod.name}.ts')
+def generate_component_code(model, component, root):
+    out_file = os.path.join(root, 'src/components', f'{component.name}.ts')
     os.makedirs(os.path.dirname(out_file), exist_ok=True)
+
+    in_templates = {
+        'endpoint': {
+            'name': 'endpoint',
+            'datatype': 'string',
+            'control': True,
+            'default': 'DEFAULT_ENDPOINT',
+        },
+        'port': {
+            'name': 'port',
+            'datatype': 'number',
+            'control': True,
+        },
+        'in-bang': {
+            'name': 'in',
+            'datatype': 'bang',
+        },
+    }
+
+    out_templates = {
+        'endpoint': {
+            'name': 'endpoint',
+            'datatype': 'string',
+        },
+        'out-bang': {
+            'name': 'out',
+            'datatype': 'bang',
+        },
+    }
+
+    def get_js_value(property, *, in_port=None, out_port=None):
+        if in_port and out_port:
+            raise ValueError
+        elif in_port:
+            port = in_port
+            templates = in_templates
+        elif out_port:
+            port = out_port
+            templates = out_templates
+        else:
+            raise ValueError
+
+        try:
+            value = port[property]
+        except KeyError as err:
+            try:
+                template_name = port.template
+            except AttributeError:
+                raise err
+            try:
+                template = templates[template_name]
+                value = template[property]
+            except AttributeError:
+                raise err
+
+        def js_bool(value):
+            return repr(bool(value)).lower()
+
+        escape = {
+            'name': repr,  # string in quotes
+            'datatype': repr,  # string in quotes
+            'control': js_bool,  # lowercase boolean constant
+            'default': str,  # verbatim default expression
+            'description': repr,  # string in quotes
+        }
+
+        return escape[property](value)
 
     @generate(out_file)
     def code():
-        def map_params(messageClass, mandatory, repeated, optional):
-            for param in messageClass.params:
-                if isinstance(param, MandatoryParam):
-                    yield mandatory(param)
-                elif isinstance(param, RepeatedParam):
-                    yield repeated(param)
-                elif isinstance(param, OptionalParam):
-                    for i in range(len(param.options)):
-                        yield optional(param, i)
+        yield from lines(f"""\
+import * as noflo from 'noflo';
 
-        def map_params_code(messageClass, mandatory, repeated, optional):
-            for generator in map_params(messageClass, mandatory, repeated, optional):
-                yield from generator
+// <default GSL customizable: module-extras />
 
-        def field_names(messageClass):
-            return map_params(
-                messageClass,
-                mandatory=lambda param: param.name,
-                repeated=lambda param: param.name,
-                optional=lambda param, i: param.options[i],
-            )
-
-        def message_class_code(messageClass):
-            message = messageClass.message
-            proto = message.proto
-
-            def message_init_code():
-                def init_param_strs():
-                    def param_str(name, typ, default=None, repeated=False, optional=False):
-                        if repeated:
-                            return f"public {case(snake=name, to='camel')}: {typ}"
-                        elif default is not None and default != "undefined":
-                            return f"public {case(snake=name, to='camel')}: {typ} = {default}"
-                        elif optional or default == "undefined":
-                            return f"public {case(snake=name, to='camel')}?: {typ}"
-                        else:
-                            return f"public {case(snake=name, to='camel')}: {typ}"
-
-                    def mandatory(param):
-                        typescript = param.field.typescript_spec
-                        return param_str(param.name, typescript.typ, typescript.default)
-
-                    def repeated(param):
-                        typescript = param.field.typescript_spec
-                        return param_str(param.name, typescript.typ, typescript.default, repeated=True)
-
-                    def optional(param, i):
-                        typescript = param.fields[i].typescript_spec
-                        return param_str(param.options[i], typescript.typ, typescript.default, optional=True)
-
-                    yield from map_params(messageClass, mandatory, repeated, optional)
-
-                yield from lines(f"""\
-    constructor({", ".join(init_param_strs())}) {{
-        super();
-    }}""")
-
-            def message_parse_code():
-                def init_param_strs():
-                    yield from map_params(
-                        messageClass,
-                        mandatory=lambda param: case(snake=param.name, to='camel'),
-                        repeated=lambda param: case(snake=param.name, to='camel'),
-                        optional=lambda param, i: case(snake=param.options[i], to='camel'),
-                    )
-
-                yield from lines(f"""\
-
-    static parseFrom(containerMsg: ProtoContainerMessage): Message {{
-        let msg = (<any> containerMsg).get{case(snake=message.discriminator, to='pascal')}();""")
-
-                yield from map_params_code(
-                    messageClass,
-                    mandatory=lambda param: lines(f"""\
-        let {case(snake=param.name, to='camel')} = msg.get{case(snake=param.name, to='pascal')}();"""),
-                    repeated=lambda param: lines(f"""\
-        let {case(snake=param.name, to='camel')} = msg.get{case(snake=param.name, to='pascal')}List();"""),
-                    optional=lambda param, i: lines(f"""\
-        let {case(snake=param.options[i], to='camel')} = msg.get{case(snake=param.options[i], to='pascal')}();""")
-                    if len(param.options) == 1 else lines(f"""\
-        let {case(snake=param.options[i], to='camel')} = msg.has{case(snake=param.options[i], to='pascal')}()? msg.get{case(snake=param.options[i], to='pascal')}() : undefined;"""),
-                )
-
-                yield from lines(f"""\
-        return new {messageClass.name}({", ".join(init_param_strs())});
-    }}""")
-
-            def message_serialize_code():
-                yield from lines(f"""\
-
-    serializeTo(containerMsg: ProtoContainerMessage): void {{
-        let msg = new {proto.name}_pb.{message.name}();""")
-
-                def assignment_str(name, nested=False, repeated=False):
-                    if repeated:
-                        return f"msg.set{case(snake=name, to='pascal')}List(this.{case(snake=name, to='camel')});"
-                    elif nested:
-                        return f"msg.set{case(snake=name, to='pascal')}(this.{case(snake=name, to='camel')});"
-                    else:
-                        return f"msg.set{case(snake=name, to='pascal')}(this.{case(snake=name, to='camel')});"
-
-                yield from map_params_code(
-                    messageClass,
-                    mandatory=lambda param: lines(f"""\
-        {assignment_str(param.name, nested=param.field.nested)}"""),
-                    repeated=lambda param: lines(f"""\
-        {assignment_str(param.name, nested=param.field.nested, repeated=True)}"""),
-                    optional=lambda param, i: lines(f"""\
-        {assignment_str(param.options[i], nested=param.fields[i].nested)}""")
-                    if len(param.options) == 1 else lines(f"""\
-        {assignment_str(param.options[i], nested=param.fields[i].nested)}"""),
-                )
-                yield from lines(f"""\
-        (<any> containerMsg).set{case(snake=message.discriminator, to='pascal')}(msg);
-    }}""")
-
-            request = messageClass.direction == "=>"
-            async = messageClass.direction == "<-"
-            complex = len(message.requestClasses if request else message.replyClasses) > 1
-
-            decorator = "message" if complex else "RequestMsg.message" if request else "ReplyMsg.message"
-
-            yield from lines(f"""\
-
-@{decorator}({proto.name}_pb.{message.name}, PayloadCase.{message.discriminator.upper()})
-export class {messageClass.name} extends Message {{""")
-
-            if async:
-                yield from lines(f"""\
-    async = true;
+export function getComponent() {{
+    let c = new noflo.Component();
+    c.description = {component.description!r};
+    c.icon = {component.icon!r};
 
 """)
 
-            yield from message_init_code()
-
+        for port in component.inPorts:
             yield from lines(f"""\
-
-    // <default GSL customizable: {messageClass.name}-extra-members />""")
-
-            if not complex:
-                yield from message_parse_code()
-
-            yield from message_serialize_code()
-            yield from lines(f"""\
-}}""")
-
-        def complex_parser_code(message, request):
-            def init_param_strs(messageClass):
-                yield from map_params(
-                    messageClass,
-                    mandatory=lambda param: param.name,
-                    repeated=lambda param: param.name,
-                    optional=lambda param, i: param.options[i],
-                )
-
-            messageClasses = message.requestClasses if request else message.replyClasses
-            proto = message.proto
-
-            direction = "Request" if request else "Reply"
-            function_name = f"parse{message.name}{direction}From"
-
-            yield from lines(f"""\
-
-{direction}Msg.parser(PayloadCase.{message.discriminator.upper()})(
-    function {function_name}(containerMsg: ProtoContainerMessage): Message {{
-        let msg = (<any> containerMsg).get{case(snake=message.discriminator, to='pascal')}();""")
-
-            for field in message.fields:
-                if isinstance(field, Field):
-                    if not field.nested:
-                        yield from lines(f"""\
-        let {field.name} = msg.get{case(snake=field.name, to='pascal')}();""")
-                    else:
-                        yield from lines(f"""\
-        let {field.name} = msg.has{case(snake=field.name, to='pascal')}()? msg.get{case(snake=field.name, to='pascal')}() : undefined;""")
-                elif isinstance(field, Oneof):
-                    for field in field.fields:
-                        yield from lines(f"""\
-        let {field.name} = msg.has{case(snake=field.name, to='pascal')}()? msg.get{case(snake=field.name, to='pascal')}() : undefined;""")
+    c.inPorts.add({get_js_value('name', in_port=port)}, {{
+""")
+            for prop in ['datatype', 'control', 'default', 'description']:
+                try:
+                    prop_value = get_js_value(prop, in_port=port)
+                except KeyError:
+                    pass
                 else:
-                    assert False
-
+                    yield from lines(f"""\
+        {prop}: {prop_value},
+""")
             yield from lines(f"""\
-        // <default GSL customizable: {function_name}-return>
-        // TODO return correct message instance""")
-
-            for messageClass in messageClasses:
-                yield from lines(f"""\
-        //return new {messageClass.name}({", ".join(init_param_strs(messageClass))});""")
-
-            yield from lines(f"""\
-        return null;
-        // </GSL customizable: {function_name}-return>
-    }}
-);""")
-
-        yield from lines(f"""\
-import "babel-polyfill";
-
-import {{ RequestMsg, ReplyMsg, message, PayloadCase, Message, ProtoContainerMessage }} from './index';""")
-        for protoPath, protoName in unique((proto.path, proto.name)
-                                           for messageClass in mod.messageClasses
-                                           for proto in (messageClass.message.proto,)):
-            yield from lines(f"""\
-let {protoName}_pb: any = require('../proto{'/'.join(('',) + protoPath)}/{protoName}_pb');""")
+    }});
+""")
         yield from lines(f"""\
 
-// <default GSL customizable: module-header />""")
-        for messageClass in mod.messageClasses:
-            yield from message_class_code(messageClass)
-        for message in mod.complexMessages:
-            if len(message.requestClasses) > 1:
-                yield from complex_parser_code(message, request=True)
-            if len(message.replyClasses) > 1:
-                yield from complex_parser_code(message, request=False)
+""")
+        for port in component.outPorts:
+            yield from lines(f"""\
+    c.outPorts.add({get_js_value('name', out_port=port)}, {{
+""")
+            for prop in ['datatype', 'description']:
+                try:
+                    prop_value = get_js_value(prop, out_port=port)
+                except KeyError:
+                    pass
+                else:
+                    yield from lines(f"""\
+        {prop}: {prop_value},
+""")
+            yield from lines(f"""\
+    }});
+""")
+        yield from lines(f"""\
+
+    return c.process((input, output) => {{
+""")
+        if any(port.get('template', None) == 'endpoint' for port in component.inPorts):
+            yield from lines(f"""\
+        if (!input.hasData('endpoint')) return;
+
+        let endpoint: string = input.getData('endpoint');
+""")
+        if any(port.get('template', None) == 'endpoint' for port in component.outPorts):
+            yield from lines(f"""\
+        output.send({{
+            endpoint,
+        }});
+""")
+        preconditions = component.preconditions
+        preconditions = re.sub(r"(\w+)", r"'\1'", preconditions)
+        preconditions = re.sub(r"('\w+'(?:\s*,\s*'\w+')*)", r"input.hasData(\1)", preconditions)
+        yield from lines(f"""\
+
+        if (!({preconditions})) {{
+            output.done();
+            return;
+        }}
+""")
+        yield from lines(f"""\
+
+        // <default GSL customizable: component>
+        output.done();
+        // </GSL customizable: component>
+    }});
+}}
+""")
