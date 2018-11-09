@@ -134,7 +134,9 @@ export function getComponent() {{
 """)
         yield from lines(f"""\
 
-    return c.process((input, output) => {{
+    // <default GSL customizable: component-extras />
+
+    return c.process((input, output, context) => {{
 """)
         if any(port.get('template', None) == 'endpoint' for port in component.inPorts):
             yield from lines(f"""\

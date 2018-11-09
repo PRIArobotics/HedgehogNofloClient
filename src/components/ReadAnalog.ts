@@ -33,7 +33,9 @@ export function getComponent() {
         description: 'the sensor value',
     });
 
-    return c.process((input, output) => {
+    // <default GSL customizable: component-extras />
+
+    return c.process((input, output, context) => {
         if (!input.hasData('endpoint')) return;
 
         let endpoint: string = input.getData('endpoint');

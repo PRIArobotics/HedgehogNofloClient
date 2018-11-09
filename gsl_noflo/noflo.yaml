@@ -15,6 +15,26 @@ components:
     description: the sensor value
   preconditions: port, in
 
+- name: ReadAnalogStream
+  description: reads an analog sensor
+  icon: area-chart
+  inPorts:
+  - template: endpoint
+  - template: port
+    description: the analog port
+  - name: start
+    datatype: bang
+    description: Start the stream of sensor values
+  - name: stop
+    datatype: bang
+    description: Stop the stream of sensor values
+  outPorts:
+  - template: endpoint
+  - name: out
+    datatype: number
+    description: the sensor values
+  preconditions: port && (start || stop)
+
 - name: ReadDigital
   description: reads a digital sensor
   icon: area-chart

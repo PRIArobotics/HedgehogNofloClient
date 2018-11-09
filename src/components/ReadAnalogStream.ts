@@ -1,6 +1,9 @@
-const noflo = require('noflo');
+import * as noflo from 'noflo';
+
+// <GSL customizable: module-extras>
 import { HedgehogClient } from 'hedgehog-client';
 import { DEFAULT_ENDPOINT, connectionStore } from '../lib/ConnectionStore';
+// </GSL customizable: module-extras>
 
 export function getComponent() {
     let c = new noflo.Component();
@@ -14,8 +17,8 @@ export function getComponent() {
     });
     c.inPorts.add('port', {
         datatype: 'number',
-        description: 'the motor port',
         control: true,
+        description: 'the analog port',
     });
     c.inPorts.add('start', {
         datatype: 'bang',
@@ -28,13 +31,13 @@ export function getComponent() {
 
     c.outPorts.add('endpoint', {
         datatype: 'string',
-        description: 'returns the connection after successful execution',
     });
     c.outPorts.add('out', {
         datatype: 'number',
         description: 'the sensor values',
     });
 
+    // <GSL customizable: component-extras>
     c.contexts = {};
 
     const cleanUp = (scope) => {
@@ -49,6 +52,7 @@ export function getComponent() {
         Object.keys(c.contexts).forEach(cleanUp);
         callback();
     };
+    // </GSL customizable: component-extras>
 
     return c.process((input, output, context) => {
         if (!input.hasData('endpoint')) return;
@@ -58,11 +62,12 @@ export function getComponent() {
             endpoint,
         });
 
-        if (!input.hasData('port') || (!input.hasData('start') && !input.hasData('stop'))) {
+        if (!(input.hasData('port') && (input.hasData('start') || input.hasData('stop')))) {
             output.done();
             return;
         }
 
+        // <GSL customizable: component>
         let port: number = input.getData('port');
 
         let conn = connectionStore.getConnection(endpoint);
@@ -89,5 +94,6 @@ export function getComponent() {
             cleanUp(scope);
             output.done();
         }
+        // </GSL customizable: component>
     });
 }
