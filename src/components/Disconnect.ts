@@ -1,5 +1,5 @@
 const noflo = require('noflo');
-import {connectionStore} from '../lib/ConnectionStore';
+import { DEFAULT_ENDPOINT, connectionStore } from '../lib/ConnectionStore';
 
 export function getComponent() {
     const c = new noflo.Component();
@@ -9,7 +9,7 @@ export function getComponent() {
     c.inPorts.add('conn', {
         datatype: 'string',
         control: true,
-        default: 'tcp://localhost:10789',
+        default: DEFAULT_ENDPOINT,
     });
 
     c.outPorts.add('out', {

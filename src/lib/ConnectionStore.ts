@@ -20,4 +20,5 @@ class ConnectionStore {
     }
 }
 
+export const DEFAULT_ENDPOINT = 'tcp://localhost:10789';
 export let connectionStore = new ConnectionStore();

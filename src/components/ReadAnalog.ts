@@ -1,6 +1,6 @@
 const noflo = require('noflo');
-import {HedgehogClient} from 'hedgehog-client';
-import {connectionStore} from '../lib/ConnectionStore';
+import { HedgehogClient } from 'hedgehog-client';
+import { DEFAULT_ENDPOINT, connectionStore } from '../lib/ConnectionStore';
 
 export function getComponent() {
     let c = new noflo.Component();
@@ -10,9 +10,8 @@ export function getComponent() {
     c.inPorts.add('conn', {
         datatype: 'string',
         control: true,
-        default: 'tcp://localhost:10789',
+        default: DEFAULT_ENDPOINT,
     });
-
     c.inPorts.add('port', {
         datatype: 'number',
         description: 'the motor port',
