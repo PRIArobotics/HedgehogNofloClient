@@ -54,7 +54,7 @@ export function getComponent() {
 
         let conn = connectionStore.getConnection(endpoint);
         if(!conn) {
-            //TODO error
+            // TODO error
         }
 
         conn.getAnalog(port).then((value: number) => {

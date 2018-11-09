@@ -40,7 +40,7 @@ export function getComponent() {
         input.get('in');
 
         if(!connectionStore.getConnection(endpoint)) {
-            //TODO error
+            // TODO error
         }
 
         connectionStore.disconnect(endpoint);

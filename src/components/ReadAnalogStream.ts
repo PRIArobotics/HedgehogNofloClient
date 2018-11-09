@@ -40,7 +40,7 @@ export function getComponent() {
     // <GSL customizable: component-extras>
     c.contexts = {};
 
-    const cleanUp = (scope) => {
+    const cleanUp = scope => {
         if (!c.contexts[scope]) return;
 
         clearInterval(c.contexts[scope].interval);
@@ -48,7 +48,7 @@ export function getComponent() {
         delete c.contexts[scope];
     };
 
-    c.tearDown = (callback) => {
+    c.tearDown = callback => {
         Object.keys(c.contexts).forEach(cleanUp);
         callback();
     };
@@ -72,7 +72,7 @@ export function getComponent() {
 
         let conn = connectionStore.getConnection(endpoint);
         if(!conn) {
-            //TODO error
+            // TODO error
         }
 
         if (input.hasData('start')) {
