@@ -1,18 +1,17 @@
 const noflo = require('noflo');
-import {HedgehogClient} from 'hedgehog-client';
-import {connectionStore} from '../lib/ConnectionStore';
+import { HedgehogClient } from 'hedgehog-client';
+import { DEFAULT_ENDPOINT, connectionStore } from '../lib/ConnectionStore';
 
 export function getComponent() {
     let c = new noflo.Component();
     c.description = 'reads an analog sensor';
     c.icon = 'area-chart';
 
-    c.inPorts.add('conn', {
+    c.inPorts.add('endpoint', {
         datatype: 'string',
         control: true,
-        default: 'tcp://localhost:10789',
+        default: DEFAULT_ENDPOINT,
     });
-
     c.inPorts.add('port', {
         datatype: 'number',
         description: 'the motor port',
@@ -27,9 +26,9 @@ export function getComponent() {
         description: 'Stop the stream of sensor values',
     });
 
-    c.outPorts.add('conn', {
+    c.outPorts.add('endpoint', {
         datatype: 'string',
-        description: 'returns the connection after the stream was stopped',
+        description: 'returns the connection after successful execution',
     });
     c.outPorts.add('out', {
         datatype: 'number',
@@ -52,11 +51,18 @@ export function getComponent() {
     };
 
     return c.process((input, output, context) => {
-        if (!input.hasData('conn', 'port')) return;
+        if (!input.hasData('endpoint')) return;
 
-        if (!input.hasData('start') && !input.hasData('stop')) return;
+        let endpoint: string = input.getData('endpoint');
+        output.send({
+            endpoint,
+        });
 
-        let endpoint: string = input.getData('conn');
+        if (!input.hasData('port') || (!input.hasData('start') && !input.hasData('stop'))) {
+            output.done();
+            return;
+        }
+
         let port: number = input.getData('port');
 
         let conn = connectionStore.getConnection(endpoint);
@@ -81,9 +87,7 @@ export function getComponent() {
             const scope = input.get('stop').scope;
 
             cleanUp(scope);
-            output.sendDone({
-                conn: endpoint,
-            });
+            output.done();
         }
     });
 }

@@ -95,6 +95,39 @@ Connect out -> in Analog out -> in Disconnect
         }]);
     });
 
+    it('should work with streams', async () => {
+        const testcase = await load(`\
+INPORT=Connect.IN:IN
+OUTPORT=Analog.OUT:OUT
+
+Connect(hedgehog-client/Connect)
+Delay1(core/RepeatDelayed)
+Analog(hedgehog-client/ReadAnalogStream)
+Delay2(core/RepeatDelayed)
+Disconnect(hedgehog-client/Disconnect)
+
+0 -> port Analog
+Connect out -> start Analog
+
+# enough time for three updates
+160 -> delay Delay1
+Connect out -> in Delay1 out -> stop Analog
+
+# enough time to check no more updates are emitted
+60 -> delay Delay2
+Delay1 out -> in Delay2 out -> in Disconnect
+`);
+
+        // pass a bang as the single network input
+        assert.deepStrictEqual(await testcase([
+            { in: true },
+        ]), [
+            { out: 0 },
+            { out: 0 },
+            { out: 0 },
+        ]);
+    });
+
     after(() => {
         endpoint = null;
     });
