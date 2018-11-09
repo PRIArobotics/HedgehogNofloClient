@@ -6,10 +6,14 @@ export function getComponent() {
     c.description = 'Disconnects from a Hedgehog controller';
     c.icon = 'exchange';
 
-    c.inPorts.add('conn', {
+    c.inPorts.add('endpoint', {
         datatype: 'string',
         control: true,
         default: DEFAULT_ENDPOINT,
+    });
+    c.inPorts.add('in', {
+        datatype: 'bang',
+        description: 'signal to trigger disconnect',
     });
 
     c.outPorts.add('out', {
@@ -18,9 +22,11 @@ export function getComponent() {
     });
 
     return c.process((input, output) => {
-        if (!input.hasData('conn')) return;
+        if (!input.hasData('endpoint', 'in')) return;
 
-        let endpoint: string = input.getData('conn');
+        let endpoint: string = input.getData('endpoint');
+        input.get('in');
+
         if(!connectionStore.getConnection(endpoint)) {
             //TODO error
         }

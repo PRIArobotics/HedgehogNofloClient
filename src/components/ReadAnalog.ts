@@ -7,7 +7,7 @@ export function getComponent() {
     c.description = 'reads an analog sensor';
     c.icon = 'area-chart';
 
-    c.inPorts.add('conn', {
+    c.inPorts.add('endpoint', {
         datatype: 'string',
         control: true,
         default: DEFAULT_ENDPOINT,
@@ -22,7 +22,7 @@ export function getComponent() {
         description: 'signal to trigger a sensor request',
     });
 
-    c.outPorts.add('conn', {
+    c.outPorts.add('endpoint', {
         datatype: 'string',
         description: 'returns the connection after successful execution',
     });
@@ -32,9 +32,18 @@ export function getComponent() {
     });
 
     return c.process((input, output) => {
-        if (!input.hasData('conn', 'port', 'in')) return;
+        if (!input.hasData('endpoint')) return;
 
-        let endpoint: string = input.getData('conn');
+        let endpoint: string = input.getData('endpoint');
+        output.send({
+            endpoint,
+        });
+
+        if (!input.hasData('port', 'in')) {
+            output.done();
+            return;
+        }
+
         let port: number = input.getData('port');
         input.get('in');
 
@@ -45,7 +54,6 @@ export function getComponent() {
 
         conn.getAnalog(port).then((value: number) => {
             output.sendDone({
-                conn: endpoint,
                 out: value,
             });
         });
