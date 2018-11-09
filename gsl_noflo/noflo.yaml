@@ -1,4 +1,27 @@
 components:
+- name: Connect
+  description: Connects to a Hedgehog controller
+  icon: exchange
+  inPorts:
+  - template: endpoint
+  - template: in-bang
+    description: signal to trigger connection
+  outPorts:
+  - template: endpoint
+  - template: out-bang
+  preconditions: in
+
+- name: Disconnect
+  description: Disconnects from a Hedgehog controller
+  icon: exchange
+  inPorts:
+  - template: endpoint
+  - template: in-bang
+    description: signal to trigger disconnect
+  outPorts:
+  - template: out-bang
+  preconditions: in
+
 - name: ReadAnalog
   description: reads an analog sensor
   icon: area-chart

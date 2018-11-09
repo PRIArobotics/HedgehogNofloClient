@@ -42,6 +42,7 @@ def generate_component_code(model, component, root):
         'out-bang': {
             'name': 'out',
             'datatype': 'bang',
+            'description': 'signals successful execution',
         },
     }
 

@@ -1,8 +1,11 @@
-const noflo = require('noflo');
+import * as noflo from 'noflo';
+
+// <GSL customizable: module-extras>
 import { DEFAULT_ENDPOINT, connectionStore } from '../lib/ConnectionStore';
+// </GSL customizable: module-extras>
 
 export function getComponent() {
-    const c = new noflo.Component();
+    let c = new noflo.Component();
     c.description = 'Disconnects from a Hedgehog controller';
     c.icon = 'exchange';
 
@@ -21,10 +24,19 @@ export function getComponent() {
         description: 'signals successful execution',
     });
 
-    return c.process((input, output) => {
-        if (!input.hasData('endpoint', 'in')) return;
+    // <default GSL customizable: component-extras />
+
+    return c.process((input, output, context) => {
+        if (!input.hasData('endpoint')) return;
 
         let endpoint: string = input.getData('endpoint');
+
+        if (!(input.hasData('in'))) {
+            output.done();
+            return;
+        }
+
+        // <GSL customizable: component>
         input.get('in');
 
         if(!connectionStore.getConnection(endpoint)) {
@@ -36,5 +48,6 @@ export function getComponent() {
         output.sendDone({
             out: true,
         });
+        // </GSL customizable: component>
     });
 }
