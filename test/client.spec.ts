@@ -3,9 +3,9 @@ import "@babel/polyfill";
 import { promisify } from 'util';
 import * as assert from 'assert';
 import * as noflo from 'noflo';
-// import * as zmq from 'zeromq';
+import * as zmq from 'zeromq';
 
-import { HedgehogClient } from "hedgehog-client";
+import { HedgehogClient, protocol, Message, analog } from "hedgehog-client";
 
 // needs to be imported here, otherwise Mocha will complain about a leaked variable
 import '../lib/ConnectionStore';
@@ -31,11 +31,42 @@ Copy(core/Copy)
 
 // TODO mock the server, requires exposed RequestMsg and ReplyMsg in hedgehog-client
 describe('Client:', () => {
-    let endpoint = null;
+    let server1 = null;
+    let server2 = null;
 
     before(() => {
-        endpoint = 'tcp://localhost:10789';
+        server1 = zmq.socket('router');
+        server1.bindSync('tcp://*:10789');
     });
+
+    before(() => {
+        server2 = zmq.socket('router');
+        server2.bindSync('tcp://*:0');
+    });
+
+    async function mock_server(server, ...pairs: Array<[Message[], Message[]]>) {
+        function recv() {
+            return new Promise<Buffer[]>((resolve, reject) => {
+                server.once('message', (...parts: Buffer[]) => {
+                    setTimeout(() => {
+                        resolve(parts);
+                    }, 0);
+                });
+            });
+        }
+
+        for(let [expected, responses] of pairs) {
+            let [ident, delimiter, ...data] = await recv();
+            let requests = data.map(msg => protocol.RequestMsg.parse(msg));
+
+            assert.deepStrictEqual(requests, expected);
+
+            server.send([
+                ident, delimiter,
+                ...responses.map(msg => Buffer.from(protocol.ReplyMsg.serialize(msg)))
+            ]);
+        }
+    }
 
     it('should work with implicit endpoint', async () => {
         const testcase = await load(`\
@@ -49,6 +80,10 @@ Disconnect(hedgehog-client/Disconnect)
 0 -> port Analog
 Connect out -> in Analog out -> in Disconnect
 `);
+
+        mock_server(server1,
+            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+        );
 
         // pass a bang as the single network input
         assert.deepStrictEqual(await testcase(true), 0);
@@ -71,6 +106,11 @@ Connect endpoint -> endpoint Analog endpoint -> endpoint Disconnect
 Connect out -> in Analog out -> in Disconnect
 `);
 
+        let promise: Promise<void>;
+        promise = mock_server(server1,
+            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+        );
+
         // don't pass an endpoint: Connect uses the default, others get it handed explicitly
         assert.deepStrictEqual(await testcase([
             { in: true },
@@ -78,21 +118,35 @@ Connect out -> in Analog out -> in Disconnect
             out: 0
         }]);
 
+        await promise;
+
+        promise = mock_server(server1,
+            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+        );
+
         // pass the default endpoint explicitly
         assert.deepStrictEqual(await testcase([
-            { endpoint },
+            { endpoint: server1.last_endpoint },
             { in: true },
         ]), [{
             out: 0
         }]);
 
+        await promise;
+
+        promise = mock_server(server2,
+            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+        );
+
         // pass a custom endpoint explicitly, to check the endpoint is propagated properly
         assert.deepStrictEqual(await testcase([
-            { endpoint: 'tcp://localhost:11789' },
+            { endpoint: server2.last_endpoint },
             { in: true },
         ]), [{
             out: 0
         }]);
+
+        await promise;
     });
 
     it('should work with streams', async () => {
@@ -118,6 +172,12 @@ Connect out -> in Delay1 out -> stop Analog
 Delay1 out -> in Delay2 out -> in Disconnect
 `);
 
+        mock_server(server1,
+            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+        );
+
         // pass a bang as the single network input
         assert.deepStrictEqual(await testcase([
             { in: true },
@@ -129,6 +189,12 @@ Delay1 out -> in Delay2 out -> in Disconnect
     });
 
     after(() => {
-        endpoint = null;
+        server2.close();
+        server2 = null;
+    });
+
+    after(() => {
+        server1.close();
+        server1 = null;
     });
 });
