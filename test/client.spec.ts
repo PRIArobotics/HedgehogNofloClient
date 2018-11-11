@@ -3,6 +3,7 @@ import "@babel/polyfill";
 import { promisify } from 'util';
 import * as assert from 'assert';
 import * as noflo from 'noflo';
+// tslint:disable-next-line:no-implicit-dependencies
 import * as zmq from 'zeromq';
 
 import { HedgehogClient, protocol, Message, analog } from "hedgehog-client";
