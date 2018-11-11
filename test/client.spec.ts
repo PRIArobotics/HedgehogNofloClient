@@ -6,7 +6,7 @@ import * as noflo from 'noflo';
 // tslint:disable-next-line:no-implicit-dependencies
 import * as zmq from 'zeromq';
 
-import { HedgehogClient, protocol, Message, analog, digital } from "hedgehog-client";
+import { HedgehogClient, protocol, Message, ack, analog, digital, motor, servo } from "hedgehog-client";
 
 // needs to be imported here, otherwise Mocha will complain about a leaked variable
 import '../lib/ConnectionStore';
@@ -254,6 +254,57 @@ Delay1 out -> in Delay2 out -> in Disconnect
                 { out: false },
                 { out: false },
             ]);
+        });
+    });
+
+    describe('Motor', () => {
+        it('should work', async () => {
+            const testcase = await load(`\
+INPORT=Connect.IN:IN
+OUTPORT=Disconnect.OUT:OUT
+
+Connect(hedgehog-client/Connect)
+Power(core/SendNext)  # caches a constant power value until a bang is received
+Motor(hedgehog-client/Motor)
+Disconnect(hedgehog-client/Disconnect)
+
+0 -> port Motor
+1000 -> data Power
+Connect out -> in Power out -> power Motor out -> in Disconnect
+`);
+
+            mock_server(server1,
+                [[new motor.Action(0, motor.MotorState.POWER, 1000)], [new ack.Acknowledgement()]],
+            );
+
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase(true), true);
+        });
+    });
+
+    describe('Servo', () => {
+        it('should work', async () => {
+            const testcase = await load(`\
+INPORT=Connect.IN:IN
+OUTPORT=Disconnect.OUT:OUT
+
+Connect(hedgehog-client/Connect)
+Position(core/SendNext)  # caches a constant position value until a bang is received
+Servo(hedgehog-client/Servo)
+Disconnect(hedgehog-client/Disconnect)
+
+0 -> port Servo
+1 -> active Servo
+2047 -> data Position
+Connect out -> in Position out -> position Servo out -> in Disconnect
+`);
+
+            mock_server(server1,
+                [[new servo.Action(0, true, 2047)], [new ack.Acknowledgement()]],
+            );
+
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase(true), true);
         });
     });
 
