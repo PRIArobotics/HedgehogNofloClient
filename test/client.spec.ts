@@ -6,7 +6,7 @@ import * as noflo from 'noflo';
 // tslint:disable-next-line:no-implicit-dependencies
 import * as zmq from 'zeromq';
 
-import { HedgehogClient, protocol, Message, analog } from "hedgehog-client";
+import { HedgehogClient, protocol, Message, analog, digital } from "hedgehog-client";
 
 // needs to be imported here, otherwise Mocha will complain about a leaked variable
 import '../lib/ConnectionStore';
@@ -31,7 +31,7 @@ Copy(core/Copy)
 });
 
 // TODO mock the server, requires exposed RequestMsg and ReplyMsg in hedgehog-client
-describe('Client:', () => {
+describe('Client', () => {
     let server1 = null;
     let server2 = null;
 
@@ -68,27 +68,6 @@ describe('Client:', () => {
             ]);
         }
     }
-
-    it('should work with implicit endpoint', async () => {
-        const testcase = await load(`\
-INPORT=Connect.IN:IN
-OUTPORT=Analog.OUT:OUT
-
-Connect(hedgehog-client/Connect)
-Analog(hedgehog-client/ReadAnalog)
-Disconnect(hedgehog-client/Disconnect)
-
-0 -> port Analog
-Connect out -> in Analog out -> in Disconnect
-`);
-
-        mock_server(server1,
-            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
-        );
-
-        // pass a bang as the single network input
-        assert.deepStrictEqual(await testcase(true), 0);
-    });
 
     it('should work with endpoint connections', async () => {
         const testcase = await load(`\
@@ -150,8 +129,32 @@ Connect out -> in Analog out -> in Disconnect
         await promise;
     });
 
-    it('should work with streams', async () => {
-        const testcase = await load(`\
+    describe('ReadAnalog', () => {
+        it('should work', async () => {
+            const testcase = await load(`\
+INPORT=Connect.IN:IN
+OUTPORT=Analog.OUT:OUT
+
+Connect(hedgehog-client/Connect)
+Analog(hedgehog-client/ReadAnalog)
+Disconnect(hedgehog-client/Disconnect)
+
+0 -> port Analog
+Connect out -> in Analog out -> in Disconnect
+`);
+
+            mock_server(server1,
+                [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+            );
+
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase(true), 0);
+        });
+    });
+
+    describe('ReadAnalogStream', () => {
+        it('should work', async () => {
+            const testcase = await load(`\
 INPORT=Connect.IN:IN
 OUTPORT=Analog.OUT:OUT
 
@@ -173,20 +176,85 @@ Connect out -> in Delay1 out -> stop Analog
 Delay1 out -> in Delay2 out -> in Disconnect
 `);
 
-        mock_server(server1,
-            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
-            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
-            [[new analog.Request(0)], [new analog.Reply(0, 0)]],
-        );
+            mock_server(server1,
+                [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+                [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+                [[new analog.Request(0)], [new analog.Reply(0, 0)]],
+            );
 
-        // pass a bang as the single network input
-        assert.deepStrictEqual(await testcase([
-            { in: true },
-        ]), [
-            { out: 0 },
-            { out: 0 },
-            { out: 0 },
-        ]);
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase([
+                { in: true },
+            ]), [
+                { out: 0 },
+                { out: 0 },
+                { out: 0 },
+            ]);
+        });
+    });
+
+    describe('ReadDigital', () => {
+        it('should work', async () => {
+            const testcase = await load(`\
+INPORT=Connect.IN:IN
+OUTPORT=Digital.OUT:OUT
+
+Connect(hedgehog-client/Connect)
+Digital(hedgehog-client/ReadDigital)
+Disconnect(hedgehog-client/Disconnect)
+
+0 -> port Digital
+Connect out -> in Digital out -> in Disconnect
+`);
+
+            mock_server(server1,
+                [[new digital.Request(0)], [new digital.Reply(0, false)]],
+            );
+
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase(true), false);
+        });
+    });
+
+    describe('ReadDigitalStream', () => {
+        it('should work', async () => {
+            const testcase = await load(`\
+INPORT=Connect.IN:IN
+OUTPORT=Digital.OUT:OUT
+
+Connect(hedgehog-client/Connect)
+Delay1(core/RepeatDelayed)
+Digital(hedgehog-client/ReadDigitalStream)
+Delay2(core/RepeatDelayed)
+Disconnect(hedgehog-client/Disconnect)
+
+0 -> port Digital
+Connect out -> start Digital
+
+# enough time for three updates
+160 -> delay Delay1
+Connect out -> in Delay1 out -> stop Digital
+
+# enough time to check no more updates are emitted
+60 -> delay Delay2
+Delay1 out -> in Delay2 out -> in Disconnect
+`);
+
+            mock_server(server1,
+                [[new digital.Request(0)], [new digital.Reply(0, false)]],
+                [[new digital.Request(0)], [new digital.Reply(0, false)]],
+                [[new digital.Request(0)], [new digital.Reply(0, false)]],
+            );
+
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase([
+                { in: true },
+            ]), [
+                { out: false },
+                { out: false },
+                { out: false },
+            ]);
+        });
     });
 
     after(() => {

@@ -57,7 +57,7 @@ export function getComponent() {
             // TODO error
         }
 
-        conn.getAnalog(port).then((value: boolean) => {
+        conn.getDigital(port).then((value: boolean) => {
             output.sendDone({
                 out: value,
             });
