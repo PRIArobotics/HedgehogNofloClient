@@ -68,7 +68,8 @@
       ".ts"
     ],
     "include": [
-      "src/**/*.ts"
+      "components/**/*.js",
+      "lib/**/*.js"
     ],
     "sourceMap": true,
     "instrument": true
