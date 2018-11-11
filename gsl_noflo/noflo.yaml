@@ -93,3 +93,37 @@ components:
     datatype: boolean
     description: the sensor values
   preconditions: port && (start || stop)
+
+- name: Motor
+  description: sets a motor's power
+  icon: tachometer
+  inPorts:
+  - template: endpoint
+  - template: port
+    description: the motor port
+  - name: power
+    datatype: number
+    description: motor power between ±1000
+  outPorts:
+  - template: endpoint
+  - template: out-bang
+  preconditions: port, power
+
+- name: Servo
+  description: sets a servo's position
+  icon: tachometer
+  inPorts:
+  - template: endpoint
+  - template: port
+    description: the servo port
+  - name: active
+    datatype: boolean
+    control: true
+    description: whether to enable the servo
+  - name: position
+    datatype: number
+    description: servo position between 0-4095
+  outPorts:
+  - template: endpoint
+  - template: out-bang
+  preconditions: port, active, position

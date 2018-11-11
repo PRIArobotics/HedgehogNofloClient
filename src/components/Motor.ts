@@ -1,49 +1,67 @@
-const noflo = require('noflo');
-import {HedgehogClient} from 'hedgehog-client';
-import {connectionStore} from '../lib/ConnectionStore';
+import * as noflo from 'noflo';
+
+// <GSL customizable: module-extras>
+import { HedgehogClient } from 'hedgehog-client';
+import { DEFAULT_ENDPOINT, connectionStore } from '../lib/ConnectionStore';
+// </GSL customizable: module-extras>
 
 export function getComponent() {
-    const c = new noflo.Component();
-    c.description = 'sets a motor\'s velocity';
+    let c = new noflo.Component();
+    c.description = "sets a motor's power";
     c.icon = 'tachometer';
 
-    c.inPorts.add('conn', {
+    c.inPorts.add('endpoint', {
         datatype: 'string',
         control: true,
-        default: 'tcp://localhost:10789',
+        default: DEFAULT_ENDPOINT,
     });
-
     c.inPorts.add('port', {
         datatype: 'number',
-        description: 'the motor port',
         control: true,
+        description: 'the motor port',
     });
     c.inPorts.add('power', {
         datatype: 'number',
-        description: 'motor power between +/-1000',
+        description: 'motor power between ±1000',
     });
 
-    c.outPorts.add('conn', {
+    c.outPorts.add('endpoint', {
         datatype: 'string',
-        description: 'returns the connection after successful execution',
+    });
+    c.outPorts.add('out', {
+        datatype: 'bang',
+        description: 'signals successful execution',
     });
 
-    return c.process((input, output) => {
-        if (!input.hasData('conn', 'port', 'power')) return;
+    // <default GSL customizable: component-extras />
 
-        let endpoint: string = input.getData('conn');
+    return c.process((input, output, context) => {
+        if (!input.hasData('endpoint')) return;
+
+        let endpoint: string = input.getData('endpoint');
+        output.send({
+            endpoint,
+        });
+
+        if (!(input.hasData('port', 'power'))) {
+            output.done();
+            return;
+        }
+
+        // <GSL customizable: component>
         let port: number = input.getData('port');
         let power: number = input.getData('power');
 
         let conn = connectionStore.getConnection(endpoint);
         if(!conn) {
-            //TODO error
+            // TODO error
         }
 
         conn.move(port, power).then(() => {
             output.sendDone({
-                conn: endpoint,
+                out: true,
             });
         });
+        // </GSL customizable: component>
     });
 }
