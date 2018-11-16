@@ -264,12 +264,12 @@ INPORT=Connect.IN:IN
 OUTPORT=Disconnect.OUT:OUT
 
 Connect(hedgehog-client/Connect)
-Power(core/SendNext)  # caches a constant power value until a bang is received
+Power(math/SendNumber)
 Motor(hedgehog-client/Motor)
 Disconnect(hedgehog-client/Disconnect)
 
 0 -> port Motor
-1000 -> data Power
+1000 -> number Power
 Connect out -> in Power out -> power Motor out -> in Disconnect
 `);
 
@@ -289,13 +289,13 @@ INPORT=Connect.IN:IN
 OUTPORT=Disconnect.OUT:OUT
 
 Connect(hedgehog-client/Connect)
-Position(core/SendNext)  # caches a constant position value until a bang is received
+Position(math/SendNumber)
 Servo(hedgehog-client/Servo)
 Disconnect(hedgehog-client/Disconnect)
 
 0 -> port Servo
 1 -> active Servo
-2047 -> data Position
+2047 -> number Position
 Connect out -> in Position out -> position Servo out -> in Disconnect
 `);
 
