@@ -127,3 +127,21 @@ components:
   - template: endpoint
   - template: out-bang
   preconditions: port, active, position
+
+- name: Threshold
+  description: Selects one of two output signals according to a threshold
+  icon: check
+  inPorts:
+  - name: threshold
+    datatype: number
+    control: true
+  - name: in
+    datatype: number
+  outPorts:
+  - name: lt
+    datatype: bang
+    description: signalled if the input was less than the threshold
+  - name: ge
+    datatype: bang
+    description: signalled if the input was greater than or equal to the threshold
+  preconditions: threshold, in

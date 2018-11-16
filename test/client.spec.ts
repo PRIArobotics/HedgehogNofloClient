@@ -357,6 +357,30 @@ Connect out -> in Servo out -> in Disconnect
         });
     });
 
+    describe('Threshold', () => {
+        it('should work', async () => {
+            const testcase = await load(`\
+INPORT=Threshold.IN:IN
+OUTPORT=Out.OUT:OUT
+
+Threshold(hedgehog-client/Threshold)
+LT(math/SendNumber)
+GE(math/SendNumber)
+Out(core/Repeat)
+
+800 -> threshold Threshold
+0 -> number LT(math/SendNumber)
+1 -> number GE(math/SendNumber)
+Threshold lt -> in LT out-> in Out
+Threshold ge -> in GE out-> in Out
+`);
+
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase(700), 0);
+            assert.deepStrictEqual(await testcase(850), 1);
+        });
+    });
+
     after(() => {
         server2.close();
         server2 = null;
