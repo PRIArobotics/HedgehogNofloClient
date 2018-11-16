@@ -145,3 +145,20 @@ components:
     datatype: bang
     description: signalled if the input was greater than or equal to the threshold
   preconditions: threshold, in
+
+- name: Conditional
+  description: Selects one of two values according to a boolean
+  icon: question
+  inPorts:
+  - name: true_value
+    datatype: all
+    control: true
+  - name: false_value
+    datatype: all
+    control: true
+  - name: in
+    datatype: boolean
+  outPorts:
+  - name: out
+    datatype: all
+  preconditions: true_value, false_value, in

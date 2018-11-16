@@ -381,6 +381,24 @@ Threshold ge -> in GE out-> in Out
         });
     });
 
+    describe('Conditional', () => {
+        it('should work', async () => {
+            const testcase = await load(`\
+INPORT=Conditional.IN:IN
+OUTPORT=Conditional.OUT:OUT
+
+Conditional(hedgehog-client/Conditional)
+
+0 -> true_value Conditional
+300 -> false_value Conditional
+`);
+
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase(true), 0);
+            assert.deepStrictEqual(await testcase(false), 300);
+        });
+    });
+
     after(() => {
         server2.close();
         server2 = null;
