@@ -282,6 +282,30 @@ Connect out -> in Power out -> power Motor out -> in Disconnect
         });
     });
 
+    describe('MotorAction', () => {
+        it('should work', async () => {
+            const testcase = await load(`\
+INPORT=Connect.IN:IN
+OUTPORT=Disconnect.OUT:OUT
+
+Connect(hedgehog-client/Connect)
+Motor(hedgehog-client/MotorAction)
+Disconnect(hedgehog-client/Disconnect)
+
+0 -> port Motor
+1000 -> power Motor
+Connect out -> in Motor out -> in Disconnect
+`);
+
+            mock_server(server1,
+                [[new motor.Action(0, motor.MotorState.POWER, 1000)], [new ack.Acknowledgement()]],
+            );
+
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase(true), true);
+        });
+    });
+
     describe('Servo', () => {
         it('should work', async () => {
             const testcase = await load(`\
@@ -297,6 +321,31 @@ Disconnect(hedgehog-client/Disconnect)
 1 -> active Servo
 2047 -> number Position
 Connect out -> in Position out -> position Servo out -> in Disconnect
+`);
+
+            mock_server(server1,
+                [[new servo.Action(0, true, 2047)], [new ack.Acknowledgement()]],
+            );
+
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase(true), true);
+        });
+    });
+
+    describe('ServoAction', () => {
+        it('should work', async () => {
+            const testcase = await load(`\
+INPORT=Connect.IN:IN
+OUTPORT=Disconnect.OUT:OUT
+
+Connect(hedgehog-client/Connect)
+Servo(hedgehog-client/ServoAction)
+Disconnect(hedgehog-client/Disconnect)
+
+0 -> port Servo
+1 -> active Servo
+2047 -> position Servo
+Connect out -> in Servo out -> in Disconnect
 `);
 
             mock_server(server1,

@@ -1,0 +1,13 @@
+# @icon tachometer
+
+INPORT=Motor.ENDPOINT:ENDPOINT
+INPORT=Motor.PORT:PORT
+INPORT=Power.NUMBER:POWER
+INPORT=Power.IN:IN
+OUTPORT=Motor.ENDPOINT:ENDPOINT
+OUTPORT=Motor.OUT:OUT
+
+Power(math/SendNumber)
+Motor(hedgehog-client/Motor)
+
+Power out -> power Motor

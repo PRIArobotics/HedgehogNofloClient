@@ -1,0 +1,14 @@
+# @icon tachometer
+
+INPORT=Servo.ENDPOINT:ENDPOINT
+INPORT=Servo.PORT:PORT
+INPORT=Servo.ACTIVE:ACTIVE
+INPORT=Position.NUMBER:POSITION
+INPORT=Position.IN:IN
+OUTPORT=Servo.ENDPOINT:ENDPOINT
+OUTPORT=Servo.OUT:OUT
+
+Position(math/SendNumber)
+Servo(hedgehog-client/Servo)
+
+Position out -> position Servo
