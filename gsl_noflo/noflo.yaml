@@ -19,6 +19,7 @@ components:
   - template: in-bang
     description: signal to trigger disconnect
   outPorts:
+  - template: endpoint
   - template: out-bang
   preconditions: in
 

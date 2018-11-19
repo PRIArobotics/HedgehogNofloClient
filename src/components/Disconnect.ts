@@ -19,6 +19,9 @@ export function getComponent() {
         description: 'signal to trigger disconnect',
     });
 
+    c.outPorts.add('endpoint', {
+        datatype: 'string',
+    });
     c.outPorts.add('out', {
         datatype: 'bang',
         description: 'signals successful execution',
@@ -30,6 +33,9 @@ export function getComponent() {
         if (!input.hasData('endpoint')) return;
 
         let endpoint: string = input.getData('endpoint');
+        output.send({
+            endpoint,
+        });
 
         if (!(input.hasData('in'))) {
             output.done();
