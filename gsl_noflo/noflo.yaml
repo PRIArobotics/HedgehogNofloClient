@@ -39,7 +39,7 @@ components:
     description: the sensor value
   preconditions: port, in
 
-- name: ReadAnalogStream
+- name: Analog
   description: reads an analog sensor
   icon: area-chart
   inPorts:
@@ -75,7 +75,7 @@ components:
     description: the sensor value
   preconditions: port, in
 
-- name: ReadDigitalStream
+- name: Digital
   description: reads a digital sensor
   icon: area-chart
   inPorts:

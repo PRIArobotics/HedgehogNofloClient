@@ -152,7 +152,7 @@ Connect out -> in Analog out -> in Disconnect
         });
     });
 
-    describe('ReadAnalogStream', () => {
+    describe('Analog', () => {
         it('should work', async () => {
             const testcase = await load(`\
 INPORT=Connect.IN:IN
@@ -160,7 +160,7 @@ OUTPORT=Analog.OUT:OUT
 
 Connect(hedgehog-client/Connect)
 Delay1(core/RepeatDelayed)
-Analog(hedgehog-client/ReadAnalogStream)
+Analog(hedgehog-client/Analog)
 Delay2(core/RepeatDelayed)
 Disconnect(hedgehog-client/Disconnect)
 
@@ -216,7 +216,7 @@ Connect out -> in Digital out -> in Disconnect
         });
     });
 
-    describe('ReadDigitalStream', () => {
+    describe('Digital', () => {
         it('should work', async () => {
             const testcase = await load(`\
 INPORT=Connect.IN:IN
@@ -224,7 +224,7 @@ OUTPORT=Digital.OUT:OUT
 
 Connect(hedgehog-client/Connect)
 Delay1(core/RepeatDelayed)
-Digital(hedgehog-client/ReadDigitalStream)
+Digital(hedgehog-client/Digital)
 Delay2(core/RepeatDelayed)
 Disconnect(hedgehog-client/Disconnect)
 
