@@ -1,0 +1,17 @@
+# @icon tachometer
+
+INPORT=Endpoint.IN:ENDPOINT
+INPORT=Motor1.PORT:PORT1
+INPORT=Motor2.PORT:PORT2
+INPORT=Motor1.POWER:POWER1
+INPORT=Motor2.POWER:POWER2
+OUTPORT=Endpoint.OUT:ENDPOINT
+OUTPORT=Motor1.OUT:OUT
+
+Endpoint(core/Repeat)
+Motor1(hedgehog-client/Motor)
+Motor2(hedgehog-client/Motor)
+
+'tcp://localhost:10789' -> in Endpoint
+Endpoint out -> endpoint Motor1
+Endpoint out -> endpoint Motor2
