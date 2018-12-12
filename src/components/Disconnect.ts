@@ -49,11 +49,13 @@ export function getComponent() {
             // TODO error
         }
 
-        connectionStore.disconnect(endpoint);
+        setTimeout(() => {
+            connectionStore.disconnect(endpoint);
 
-        output.sendDone({
-            out: true,
-        });
+            output.sendDone({
+                out: true,
+            });
+        }, 50);
         // </GSL customizable: component>
     });
 }
