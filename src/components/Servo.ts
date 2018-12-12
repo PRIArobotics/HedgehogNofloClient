@@ -27,6 +27,7 @@ export function getComponent() {
     });
     c.inPorts.add('position', {
         datatype: 'number',
+        control: true,
         description: 'servo position between 0-4095',
     });
 
@@ -48,7 +49,7 @@ export function getComponent() {
             endpoint,
         });
 
-        if (!(input.hasData('port', 'active', 'position'))) {
+        if (!(input.hasData('port', 'active'))) {
             output.done();
             return;
         }
@@ -56,6 +57,12 @@ export function getComponent() {
         // <GSL customizable: component>
         let port: number = input.getData('port');
         let active: boolean = input.getData('active');
+
+        if (active && !input.hasData('position')) {
+            output.done();
+            return;
+        }
+
         let position: number = input.getData('position');
 
         let conn = connectionStore.getConnection(endpoint);

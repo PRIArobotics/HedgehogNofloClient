@@ -307,24 +307,54 @@ Connect out -> in Motor out -> in Disconnect
     });
 
     describe('Servo', () => {
-        it('should work', async () => {
+        it('should go to position when sending active and position', async () => {
             const testcase = await load(`\
 INPORT=Connect.IN:IN
 OUTPORT=Disconnect.OUT:OUT
 
 Connect(hedgehog-client/Connect)
+Active(math/SendNumber)
 Position(math/SendNumber)
 Servo(hedgehog-client/Servo)
 Disconnect(hedgehog-client/Disconnect)
 
 0 -> port Servo
-1 -> active Servo
+1 -> number Active
 2047 -> number Position
-Connect out -> in Position out -> position Servo out -> in Disconnect
+Connect out -> in Active out -> active Servo
+Connect out -> in Position out -> position Servo
+Servo out -> in Disconnect
 `);
 
             mock_server(server1,
                 [[new servo.Action(0, true, 2047)], [new ack.Acknowledgement()]],
+            );
+
+            // pass a bang as the single network input
+            assert.deepStrictEqual(await testcase(true), true);
+        });
+
+        it('should deactivate when sending !active and not position', async () => {
+            const testcase = await load(`\
+INPORT=Connect.IN:IN 
+OUTPORT=Disconnect.OUT:OUT
+
+Connect(hedgehog-client/Connect)
+Active(math/SendNumber)
+# Position(math/SendNumber)
+Servo(hedgehog-client/Servo)
+Disconnect(hedgehog-client/Disconnect)
+
+0 -> port Servo
+0 -> number Active
+# 2047 -> number Position
+Connect out -> in Active out -> active Servo
+# Connect out -> in Position out -> position Servo
+Servo out -> in Disconnect
+`);
+
+            mock_server(server1,
+                [[new servo.Action(0, false)], [new ack.Acknowledgement()]],
             );
 
             // pass a bang as the single network input

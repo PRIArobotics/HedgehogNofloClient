@@ -123,11 +123,12 @@ components:
     description: whether to enable the servo
   - name: position
     datatype: number
+    control: true
     description: servo position between 0-4095
   outPorts:
   - template: endpoint
   - template: out-bang
-  preconditions: port, active, position
+  preconditions: port, active
 
 - name: Threshold
   description: Selects one of two output signals according to a threshold
