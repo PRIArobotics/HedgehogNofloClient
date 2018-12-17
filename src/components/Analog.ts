@@ -36,6 +36,10 @@ export function getComponent() {
         datatype: 'number',
         description: 'the sensor values',
     });
+    c.outPorts.add('stop', {
+        datatype: 'bang',
+        description: 'signals stopped execution',
+    });
 
     // <GSL customizable: component-extras>
     c.contexts = {};
@@ -92,7 +96,9 @@ export function getComponent() {
             const scope = input.get('stop').scope;
 
             cleanUp(scope);
-            output.done();
+            output.sendDone({
+                stop: true,
+            });
         }
         // </GSL customizable: component>
     });

@@ -57,6 +57,9 @@ components:
   - name: out
     datatype: number
     description: the sensor values
+  - template: out-bang
+    name: stop
+    description: signals stopped execution
   preconditions: port && (start || stop)
 
 - name: ReadDigital
@@ -93,6 +96,9 @@ components:
   - name: out
     datatype: boolean
     description: the sensor values
+  - template: out-bang
+    name: stop
+    description: signals stopped execution
   preconditions: port && (start || stop)
 
 - name: Motor
